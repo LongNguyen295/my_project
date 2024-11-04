@@ -55,7 +55,7 @@ const ListSong = () => {
             >
               <img className="w-12" src={item.image} alt="" />
               <p>{item.name}</p>
-              <p>{item.album}</p>
+              <p>{item.album ? item.album.name : "Unknown Album"}</p> {/* Hiển thị tên album */}
               <p>{item.duration}</p>
               <p className="cursor-pointer" onClick={() => removeSong(item._id)}>x</p>
             </div>

@@ -11,7 +11,8 @@ const songSchema = new mongoose.Schema({
         required: true
     },
     album: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId, // Tham chiếu đến Album
+        ref: 'Album', // Tên của model Album (cần tạo model này nếu chưa có)
         required: true
     },
     image: {

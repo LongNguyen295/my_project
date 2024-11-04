@@ -57,7 +57,8 @@ const addSong = async (req, res) => {
 
 const listSong = async (req, res) => {
     try {
-        const allSongs = await songModel.find({});
+        // Populate để lấy thông tin album
+        const allSongs = await songModel.find({}).populate('album');
         res.json({ success: true, songs: allSongs });
     } catch (error) {
         console.error("Error in listSong:", error);
