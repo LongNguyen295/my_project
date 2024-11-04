@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -10,7 +10,29 @@ const AddSong = () => {
     file: null,
     image: null,
   });
+
+  const [albums, setAlbums] = useState([]); // Thêm state để lưu danh sách album
   const [loading, setLoading] = useState(false);
+
+  // Hàm để lấy danh sách album từ API
+  const fetchAlbums = async () => {
+    try {
+      const response = await axios.get("http://localhost:4000/api/album/list");
+      if (response.data.success) {
+        setAlbums(response.data.albums); // Lưu danh sách album vào state
+      } else {
+        toast.error("Failed to load albums");
+      }
+    } catch (error) {
+      console.error("Error fetching albums:", error);
+      toast.error("Error occurred while fetching albums");
+    }
+  };
+
+  // Gọi API lấy danh sách album khi component được mount
+  useEffect(() => {
+    fetchAlbums();
+  }, []);
 
   const handleChange = (e) => {
     setSongData({
@@ -48,7 +70,7 @@ const AddSong = () => {
     formData.append("desc", songData.desc);
     formData.append("album", songData.album);
     if (songData.file) {
-      formData.append("file", songData.file);
+      formData.append("audio", songData.file);
     }
     if (songData.image) {
       formData.append("image", songData.image);
@@ -79,8 +101,11 @@ const AddSong = () => {
       }
     } catch (error) {
       // Hiển thị chi tiết lỗi từ backend (nếu có)
-      const errorMessage = error.response?.data?.message || "Error occurred while adding song";
+      const errorMessage =
+        error?.response?.data?.message || "Error occurred while adding song";
       toast.error(errorMessage);
+
+      // Log toàn bộ lỗi để kiểm tra chi tiết nếu cần
       console.error("Error uploading song:", error);
     } finally {
       setLoading(false);
@@ -164,8 +189,12 @@ const AddSong = () => {
           onChange={handleChange}
           className="bg-transparent outline-green-600 border-2 border-gray-400 p-2.5 w-[max(40vw,250px)]"
         >
-          <option value="">None</option>
-          {/* Add more options here as needed */}
+          <option value="">Select an album</option>
+          {albums.map((album) => (
+            <option key={album._id} value={album._id}>
+              {album.name}
+            </option>
+          ))}
         </select>
       </div>
 
