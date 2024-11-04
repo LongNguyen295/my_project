@@ -54,11 +54,11 @@ const DisplayAlbum = () => {
       </div>
       <hr />
       {songsData
-        .filter((item) => item.album === albumData.name) // Sử dụng albumData.name
+        .filter((item) => item.album && item.album._id === albumData._id) // thay đổi đk lọc
         .map((item, index) => (
           <div
             onClick={() => playWithId(item._id)}
-            key={index}
+            key={item._id}
             className="grid grid-cols-3 sm:grid-cols-4 gap-2 p-2 items-center text-[#a7a7a7] hover:bg-[#ffffff2b] cursor-pointer"
           >
             <p className="text-white">
