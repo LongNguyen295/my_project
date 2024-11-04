@@ -1,3 +1,5 @@
+// Component hiển thị thanh điều hướng của ứng dụng
+
 import React from "react";
 import { assets } from "../assets/frontend-assets/assets";
 import { useNavigate } from "react-router-dom";

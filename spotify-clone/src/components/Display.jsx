@@ -1,3 +1,5 @@
+// Hiển thị nội dung chính của trang
+
 import React, { useEffect, useRef, useContext } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import DisplayHome from "./DisplayHome";

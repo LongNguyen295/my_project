@@ -1,3 +1,5 @@
+// Component chính của trang chủ, hiển thị danh sách các album và bài hát nổi bật
+
 import React from "react";
 import Navbar from "./Navbar";
 import AlbumItem from "./AlbumItem";

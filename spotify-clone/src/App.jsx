@@ -1,3 +1,5 @@
+//Cấu hình và render ứng dụng
+
 import React, { useContext } from "react";
 import Sidebar from "./components/Sidebar";
 import Player from "./components/Player";

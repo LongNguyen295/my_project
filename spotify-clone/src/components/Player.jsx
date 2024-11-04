@@ -1,3 +1,5 @@
+// Phát, tạm dừng, chuyển bài, và điều chỉnh thanh tiến trình của bài hát
+
 import React, { useContext } from "react";
 import { assets } from "../assets/frontend-assets/assets";
 import { PlayerContext } from "../context/PlayerContext";

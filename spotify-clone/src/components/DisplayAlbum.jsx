@@ -1,3 +1,5 @@
+// Hiển thị chi tiết của một album, bao gồm danh sách bài hát
+
 import React, { useContext, useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import { useParams } from "react-router-dom";

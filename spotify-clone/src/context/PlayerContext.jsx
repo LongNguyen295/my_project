@@ -1,3 +1,5 @@
+// Context để lưu trữ và quản lý trạng thái phát nhạc
+
 import { createContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 
@@ -35,9 +37,11 @@ const PlayerContextProvider = (props) => {
 
   const playWithId = (id) => {
     const selectedTrack = songsData.find((item) => item._id === id);
+    console.log("Selected Track:", selectedTrack); // Ghi log bài hát được chọn
     if (selectedTrack) {
       setTrack(selectedTrack);
       if (audioRef.current) {
+        audioRef.current.src = selectedTrack.file; // Gán src cho audioRef
         audioRef.current.play();
         setPlayStatus(true);
       }

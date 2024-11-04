@@ -1,3 +1,5 @@
+//Hiển thị thông tin từng album
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
