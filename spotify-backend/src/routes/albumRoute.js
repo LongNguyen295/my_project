@@ -10,7 +10,7 @@ albumRouter.post('/add', upload.single('image'), addAlbum);
 // Route để lấy danh sách album
 albumRouter.get('/list', listAlbums);
 
-// Route để xóa album dựa trên id
-albumRouter.post('/remove', removeAlbum);
+// Route để xóa album dựa trên albumId, sử dụng phương thức DELETE
+albumRouter.delete('/remove/:albumId', removeAlbum);
 
 export default albumRouter;

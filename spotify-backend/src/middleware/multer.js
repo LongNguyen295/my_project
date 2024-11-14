@@ -4,13 +4,18 @@ import path from 'path';
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, callback) => {
-    const allowedExtensions = /\.(jpeg|jpg|png|gif|mp3|wav)$/;
-    const mimetype = file.mimetype.startsWith('image/') || file.mimetype.startsWith('audio/');
+    const allowedExtensions = ['.jpeg', '.jpg', '.png', '.gif', '.mp3', '.wav'];
+    const fileExtension = path.extname(file.originalname).toLowerCase();
+    const isMimeTypeValid = file.mimetype.startsWith('image/') || file.mimetype.startsWith('audio/');
 
-    if (allowedExtensions.test(file.originalname.toLowerCase()) && mimetype) {
+    if (allowedExtensions.includes(fileExtension) && isMimeTypeValid) {
         callback(null, true);
     } else {
-        callback(new Error(`Only the following file types are allowed: jpeg, jpg, png, gif, mp3, wav. You uploaded: ${file.originalname}`));
+        callback(
+            new Error(
+                `Only the following file types are allowed: jpeg, jpg, png, gif, mp3, wav. You uploaded: ${file.originalname} with extension ${fileExtension}`
+            )
+        );
     }
 };
 

@@ -1,42 +1,58 @@
 import { v2 as cloudinary } from 'cloudinary';
 import albumModel from '../models/albumModel.js';
+import { getSpotifyAccessToken } from '../services/spotifyService.js';
+import axios from 'axios';
 
-// Hàm thêm album mới
+// Hàm để lấy thông tin album từ Spotify API
+const getSpotifyAlbumInfo = async (albumId) => {
+    const token = await getSpotifyAccessToken();
+    const response = await axios.get(`https://api.spotify.com/v1/albums/${albumId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+};
+
+// Hàm thêm album, có thể lấy thêm dữ liệu từ Spotify
 const addAlbum = async (req, res) => {
     try {
-        const { name, desc, bgColour } = req.body;
+        const { spotifyAlbumId } = req.body;
         const imageFile = req.file;
 
-        // Kiểm tra nếu file ảnh không tồn tại trong yêu cầu
-        if (!imageFile) {
-            return res.status(400).json({ success: false, message: "Image file is missing" });
+        // Lấy thông tin chi tiết từ Spotify
+        const spotifyAlbumData = await getSpotifyAlbumInfo(spotifyAlbumId);
+
+        // Upload ảnh lên Cloudinary nếu có
+        let imageUploadResult = null;
+        if (imageFile) {
+            imageUploadResult = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    { resource_type: "image" },
+                    (error, result) => {
+                        if (error) return reject(error);
+                        resolve(result);
+                    }
+                );
+                uploadStream.end(imageFile.buffer);
+            });
         }
 
-        // Upload ảnh lên Cloudinary sử dụng promise
-        const imageUpload = await new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                { resource_type: "image" },
-                (error, result) => {
-                    if (error) return reject(error);
-                    resolve(result);
-                }
-            );
-            uploadStream.end(imageFile.buffer); // Kết thúc stream với buffer của ảnh
-        });
-
-        // Dữ liệu album cần lưu vào MongoDB
+        // Dữ liệu để lưu album vào MongoDB
         const albumData = {
-            name,
-            desc,
-            bgColour,
-            image: imageUpload.secure_url, // Sử dụng URL bảo mật từ Cloudinary
+            spotifyId: spotifyAlbumData.id,
+            name: spotifyAlbumData.name,
+            release_date: spotifyAlbumData.release_date,
+            artists: spotifyAlbumData.artists.map(artist => artist.name),
+            total_tracks: spotifyAlbumData.total_tracks,
+            external_urls: spotifyAlbumData.external_urls.spotify,
+            image: imageUploadResult?.secure_url,
+            spotifyData: spotifyAlbumData
         };
 
-        // Tạo và lưu album vào MongoDB
         const album = new albumModel(albumData);
-        await album.save(); // Lưu album vào cơ sở dữ liệu
+        await album.save();
 
-        // Trả về phản hồi thành công
         res.json({ success: true, message: "Album added", album });
     } catch (error) {
         console.error("Error in addAlbum:", error);
@@ -49,31 +65,27 @@ const addAlbum = async (req, res) => {
 // Hàm lấy danh sách album
 const listAlbums = async (req, res) => {
     try {
-        const allAlbums = await albumModel.find({}); // Truy vấn tất cả album từ MongoDB
-        res.json({ success: true, albums: allAlbums }); // Trả về danh sách album
+        const albums = await albumModel.find(); // Lấy tất cả album từ cơ sở dữ liệu
+        res.json(albums);
     } catch (error) {
         console.error("Error in listAlbums:", error);
-        res.status(500).json({ success: false, message: "An error occurred while listing albums" });
+        res.status(500).json({ success: false, message: "Failed to fetch albums" });
     }
 };
 
-// Hàm xóa album
+// Hàm xóa album dựa trên albumId từ URL params
 const removeAlbum = async (req, res) => {
+    const { albumId } = req.params; // ID album được truyền từ URL
     try {
-        // Tìm album theo id được gửi trong body
-        const album = await albumModel.findById(req.body.id);
-
-        // Kiểm tra nếu album không tồn tại
-        if (!album) {
-            return res.status(404).json({ success: false, message: "Album not found" });
+        const deletedAlbum = await albumModel.findByIdAndDelete(albumId);
+        if (deletedAlbum) {
+            res.json({ success: true, message: "Album removed" });
+        } else {
+            res.status(404).json({ success: false, message: "Album not found" });
         }
-
-        // Xóa album khỏi cơ sở dữ liệu
-        await albumModel.findByIdAndDelete(req.body.id);
-        res.json({ success: true, message: "Album removed" });
     } catch (error) {
         console.error("Error in removeAlbum:", error);
-        res.status(500).json({ success: false, message: "An error occurred while removing the album" });
+        res.status(500).json({ success: false, message: "Failed to remove album" });
     }
 };
 
